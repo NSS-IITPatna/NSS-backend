@@ -12,8 +12,8 @@
   *  Reciever
   *  Address	
 
-* JSON Response:
-  { <br>
+* JSON Response: <br/>
+  { <br/>
 	status: // Status code returned by the api. <br/>
 	mail: // If the mail has been sent and/or recorded in the database. <br/>
 	message: //Any success or error message described here. <br/>

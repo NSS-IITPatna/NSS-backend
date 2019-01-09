@@ -13,10 +13,10 @@
   *  Address	
 
 * JSON Response:
-  {
-	status: // Status code returned by the api.
-	mail: // If the mail has been sent and/or recorded in the database.
-	message: //Any success or error message described here.
+  {__
+	status: // Status code returned by the api.__
+	mail: // If the mail has been sent and/or recorded in the database.__
+	message: //Any success or error message described here.__
   }
   
 

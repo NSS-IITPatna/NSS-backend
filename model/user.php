@@ -199,7 +199,7 @@ class User //extends AnotherClass
     		 	$msg =  "Saved to DB. Sending Verification"; 
     		} elseif ($this->conn->affected_rows==-1) {
      			if ($this->conn->errno==1062) {
-        			$status = 401;
+        			$status = 402;
         			$msg = "Duplicate entry! Email Id already in use...";
       			} else {
         			$status = 501;
@@ -210,7 +210,7 @@ class User //extends AnotherClass
       			$msg = "Server error! Couldnot fetch result!";
    		 	}
    		} else {
-   			$msg = "Invalid credentials!!";
+   			$msg = "Invalid credentials!";
    			$status = 400;
    		}
     
@@ -232,8 +232,12 @@ class User //extends AnotherClass
 	  */
 	function getUser($roll_no)
 	{
-		$sql = "SELECT * FROM users WHERE roll_no = '".isset($roll_no)?$roll_no:'-1'. "'";
-       	$result = $this->conn->query($sql);
+        if (isset($roll_no)) {
+            $sql = "SELECT * FROM users WHERE roll_no = '". $roll_no ."'";    
+        } else {
+            $sql = "SELECT * FROM users WHERE roll_no = '-1'";
+        }
+		$result = $this->conn->query($sql);
         if(!$result || $result->num_rows!=1){
             //$errorH = alog("getuser error: numrows : ". $result->num_rows ."error:". $this->conn->error);
             $error = "Error in displaying result for given User ID. ";
@@ -375,7 +379,7 @@ class User //extends AnotherClass
         	    //$errorH = alog("getuser error: numrows : ". $result->num_rows ."error:". $this->conn->error);
         	    $error = "Error in displaying result ";
         	    error_log("Error: ". $error .": ". $result->num_rows ." - ". $this->conn->error);
-                $status = 500;
+                $status = 501;
         	    $msg = $error;
         	} else {
         		$user_details = $result->fetch_assoc();

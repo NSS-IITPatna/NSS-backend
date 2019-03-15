@@ -84,13 +84,14 @@ class Hours //extends AnotherClass
 	  */
 	function getAllHourDetailsOfLoggedIn()
 	{
+		if ($this->thisUser==null || $this->thisUser->getUid()==null) {
+			$status = 403;
+		}
 		$sql = "SELECT * FROM hours WHERE uid = '".$this->thisUser->getUid(). "' ORDER BY date DESC";
 
 		$result = $this->conn->query($sql);
         if(!$result || $result->num_rows<=0){
-            $errorH = alog("getuser error: numrows : ". $result->num_rows ."error:". $this->conn->error);
-            $error = "Error in displaying result for given User ID. Err no: #".$errorH;
-            error_log("Error: ".$errorH .": ". $result->num_rows ." - ". $this->conn->error);
+            $error = "Error in displaying result for given User ID.";
             $status = 501;
             $msg = $error;
         } else {
@@ -100,7 +101,7 @@ class Hours //extends AnotherClass
         		$res[] = $hours;
         	}
         	$this->setHours($res);
-        	$result->free();
+        	//$result->free();
         }
 
         $ret = array();
@@ -123,27 +124,25 @@ class Hours //extends AnotherClass
 			$status = 403;
 			$msg = "Access Forbidden";
 		} else {
-			$sql = "SELECT * FROM hours ORDER BY uid , date Desc";
+			$sql = "SELECT h.*, u.roll_no FROM hours h RIGHT JOIN users u ON h.uid = u.uid ORDER BY h.uid , h.date Desc, h.timestamp DESC";
 
 			$result = $this->conn->query($sql);
-	        if(!$result || $result->num_rows<=0){
-	            $errorH = alog("getuser error: numrows : ". $result->num_rows ."error:". $this->conn->error);
-	            $error = "Error in displaying result for given User ID. Err no: #".$errorH;
-	            error_log("Error: ".$errorH .": ". $result->num_rows ." - ". $this->conn->error);
+	        if(!$result || $result->num_rows<0){
+	            $error = "Error in displaying result";
 	            $status = 501;
 	            $msg = $error;
 	        } else {
 	        	$status = 200;
 	        	$res = array();
-   		     	$uid = -1;
-    	    	while ($details = $result->fetch_assoc()) {
-    	    		if ($details['uid']!=$uid) {
-    	    			$res[] = $temp;
-    	    			$temp = array();
+   		     	$roll = "";
+   		     	while ($details = $result->fetch_assoc()) {
+    	    		if ($details['roll_no']!=$roll) {
+    	    			$roll = $details['roll_no'];
     	    		}
-    	    		$temp[] = $details;
-    	    	}
-    	    	$result->free();
+    	    		unset($details['roll_no']);
+    	    		$res[$roll][] = $details;
+    	    	} 
+    	    	//$result->free();
     	    }
     	}
 
@@ -159,31 +158,34 @@ class Hours //extends AnotherClass
 
 	/**
 	  *	get latest hour detail of a user
-	  * @param User $user : User who is to be followed by Logged in user
+	  * @param User $user : user object
 	  * @return 
 	  */
 	function getHourDetails(User $user)
 	{
-		if(!isset($this->thisUser) || $this->thisUser->getAccessLevel()!=1){
+		if((!isset($this->thisUser) || $this->thisUser->getAccessLevel()!=1) && $user->getRollNo()!=$this->thisUser->getRollNo()){
 			$status = 403;
 			$msg = "Access Forbidden";
 		} else {
-			$sql = "SELECT * FROM hours WHERE uid = '". $user->getUid(). "' ORDER BY date DESC";
+			if ($user->getUid()==null) {
+				$status = 400;
+				$msg = "Invalid input";
+			} else {
+				$sql = "SELECT * FROM hours WHERE uid = '". $user->getUid(). "' ORDER BY date DESC, timestamp DESC";
 
-			$result = $this->conn->query($sql);
-        	if(!$result || $result->num_rows<=0){
-        	    $errorH = alog("getuser error: numrows : ". $result->num_rows ."error:". $this->conn->error);
-        	    $error = "Error in displaying result for given User ID. Err no: #".$errorH;
-        	    error_log("Error: ".$errorH .": ". $result->num_rows ." - ". $this->conn->error);
-        	    $status = 501;
-        	    $msg = $error;
-        	} else {
-        		$res = array();
-        		$status = 200;
-        		while ($hours = $result->fetch_assoc()) {
-        			$res[] = $hours;
+				$result = $this->conn->query($sql);
+        		if(!$result || $result->num_rows<0){
+        		    $error = "Error in displaying result for given User ID.";
+        		    $status = 501;
+        		    $msg = $error;
+        		} else {
+        			$res = array();
+        			$status = 200;
+        			while ($hours = $result->fetch_assoc()) {
+        				$res[] = $hours;
+        			}
+        			//$result->free();
         		}
-        		$result->free();
         	}	
         }
 
@@ -220,13 +222,13 @@ class Hours //extends AnotherClass
 		if($user->getName()==null || $user->getUid()==null){
 			return 0;
 		}
-		if((int)$hours>=24){
+		if($hours==null || (int)$hours>=24 || (int)$hours==0){
 			return 0;
 		}
-		if (!preg_match('/^[a-zA-Z0-9._-()\s]*$/', $reason)) {
+		if ($reason==null || !preg_match('/^[a-zA-Z0-9._()\-\s]*$/', $reason)) {
 			return 0;
 		}
-		if (strtotime($date)-strtotime(Date())>0) {
+		if (strtotime($date)-strtotime(Date('Y-m-d'))>0) {
 			return 0;
 		}
 
@@ -243,6 +245,8 @@ class Hours //extends AnotherClass
 	  *					   	: 501 : Server Error
 	  * 		['message'] : Message corresponding the status code 
 	  */
+
+
 	function addNewHours(User $user, $hours, $reason, $date)
 	{
 		if(!isset($this->thisUser) || $this->thisUser->getAccessLevel()!=1){
@@ -250,20 +254,26 @@ class Hours //extends AnotherClass
 			$msg = "Access Forbidden";
 		} else {
 			if($this->validate($user,$hours,$reason,$date)) {
-				$sql = "INSERT INTO hours(uid,hours,reason,date,key) VALUES (".$user->getUid().", ".$hours.", ".$reason.", ".$date.", ".sha1($reason.$hour.$date).")";
+				$entry_id = hash("sha256",$reason) ."@". $uid . $hours . strtotime($date);
+				$sql = "INSERT INTO hours(uid,hours,reason,date,entry_id) VALUES (".$user->getUid().", ".$hours.", '".$reason."', '".$date."', '".$entry_id."')";
 
 				$result = $this->conn->query($sql);
-        		if(!$result || $result->num_rows<=0){
-        		    $errorH = alog("getuser error: numrows : ". $result->num_rows ."error:". $this->conn->error);
-        		    $error = "Error in displaying result for given User ID. Err no: #".$errorH;
-        		    error_log("Error: ".$errorH .": ". $result->num_rows ." - ". $this->conn->error);
-        		    $status = 501;
-        		    $msg = $error;
+        		if($this->conn->affected_rows<=0){
+        			if ($this->conn->errno==1062) {
+        				$error = "Duplicate entriy!!!";
+            			$status = 402;
+            			$msg = $error;	
+        			} else {
+	        		    //$errorH = alog("getuser error: numrows : ". $result->num_rows ."error:". $this->conn->error);
+    	        		$error = "Error in adding to the database for given User ID. ";
+        	    		error_log("Error: ". $result->num_rows ." - ". $this->conn->error);
+            			$status = 502;
+            			$msg = $error;
+        			}
         		} else {
-        			$res = array();
         			$status = 200;
         			$msg = "Added successfully"; 
-        			$result->free();
+        			////$result->free();
         		}	
         	} else {
         		$status = 400;
@@ -276,6 +286,42 @@ class Hours //extends AnotherClass
         $ret['message'] = $msg;
         return $ret;		
 	}
+
+	function removeHours($id)
+	{
+		if(!isset($this->thisUser) || $this->thisUser->getAccessLevel()!=1){
+			$status = 403;
+			$msg = "Access Forbidden";
+		} else {
+			if(isset($id) && $id>=1) {
+				$sql = "DELETE FROM hours WHERE id=". (int)$id;
+
+				$result = $this->conn->query($sql);
+        		if($this->conn->affected_rows<0){
+        			$error = "Error in removing from the database for given User ID. ";
+        	    	$status = 502;
+            		$msg = $error;
+        		} elseif($this->conn->affected_rows==0){
+        			$error = "Invalid hour id";
+        	    	$status = 400;
+            		$msg = $error;
+        		} else {
+        			$status = 200;
+        			$msg = "Removed successfully"; 
+        			//$result->free();
+        		}	
+        	} else {
+        		$status = 400;
+				$msg = "Invalid input";
+        	}
+        } 
+
+        $ret = array();
+        $ret['status'] = $status;
+        $ret['message'] = $msg;
+        return $ret;		
+	}
+
 
 	/**
 	  *	check if the user is being followed by loggedin User (Logged in users starts following this user (User $user))

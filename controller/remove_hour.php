@@ -12,23 +12,20 @@ if(!isset($_SESSION['user'])){
 } else {
 	$loggedIn = unserialize($_SESSION['user']);
 
-	$addHours = new Hours($mysqli, $loggedIn);
+	$removeHours = new Hours($mysqli, $loggedIn);
 	$user = new User($mysqli);
 
-	//$user->getUser($_POST['roll']);
-	$user->getUser("1701cs80");
-	$hours = $_POST['hours'];
-	$reason = $_POST['reason'];
-	$date = isset($_POST['date'])?$_POST['date']:Date('Y-m-d');
-
-	//$addition = $addHours->addNewHours($user, $hours, $reason, $date);
-	$addition = $addHours->addNewHours($user, 3, "nota", $date);
+	$user->getUser($_POST['roll']);
+	//$user->getUser("1701cs80");
+	$id = $_POST['hour_id'];
+	//$id = 76;
+	$remove = $removeHours->removeHours($id);
 		
-	if ($addition['status']==200) {
-		$H_details = $addHours->getHourDetails($user);
+	if ($remove['status']==200) {
+		$H_details = $removeHours->getHourDetails($user);
 
 		if ($H_details['status']==200) {
-			$total = $addHours->getTotalHour($H_details['result']);
+			$total = $removeHours->getTotalHour($H_details['result']);
 
 			$res = array();
 			$res['hours_completed'] = $total;
@@ -41,7 +38,7 @@ if(!isset($_SESSION['user'])){
 			$ret = $H_details;
 		}
 	} else {
-		$ret = $addition;
+		$ret = $remove;
 	}
 }
 

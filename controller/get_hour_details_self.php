@@ -20,6 +20,9 @@ if(!isset($_SESSION['user'])){
 		$total = $getHours->getTotalHour($H_details['result']);
 
 		$res = array();
+		$res['roll_no'] = $loggedIn->getRollNo();
+		$res['name'] = $loggedIn->getName();
+		$res['cell'] = $loggedIn->getCell();
 		$res['hours_completed'] = $total;
 		$res['hours_left'] = $total>=Tot_hours?0:(Tot_hours-$total);
 		$res['details'] = $H_details['result'];

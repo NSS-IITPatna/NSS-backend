@@ -15,8 +15,8 @@ if(!isset($_SESSION['user'])){
 	$addHours = new Hours($mysqli, $loggedIn);
 	$user = new User($mysqli);
 
-	//$user->getUser($_POST['roll']);
-	$user->getUser("1701cs80");
+	$user->getUser($_POST['roll']);
+	//$user->getUser("1701cs80");
 	$hours = $_POST['hours'];
 	$reason = $_POST['reason'];
 	$date = isset($_POST['date'])?$_POST['date']:Date('Y-m-d');
@@ -31,6 +31,9 @@ if(!isset($_SESSION['user'])){
 			$total = $addHours->getTotalHour($H_details['result']);
 
 			$res = array();
+			$res['roll_no'] = $user->getRollNo();
+			$res['name'] = $user->getName();
+			$res['cell'] = $user->getCell();
 			$res['hours_completed'] = $total;
 			$res['hours_left'] = $total>=Tot_hours?0:(Tot_hours-$total);
 			$res['details'] = $H_details['result'];

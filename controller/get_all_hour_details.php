@@ -22,6 +22,11 @@ if(!isset($_SESSION['user'])){
 			$total = $getHours->getTotalHour($value);
 
 			$res = array();
+			$user = new User($mysqli);
+			$user->getUser($key); 
+			$res['roll_no'] = $user->getRollNo();
+			$res['name'] = $user->getName();
+			$res['cell'] = $user->getCell();
 			$res['hours_completed'] = $total;
 			$res['hours_left'] = $total>=Tot_hours?0:(Tot_hours-$total);
 			

@@ -132,6 +132,11 @@ class User //extends AnotherClass
 		return $this->roll_no;
 	}	
 
+    function getCell()
+    {
+        return $this->cell;
+    }
+
 	/**
 	  * This returns the access level of the User object
 	  *	@return Access Level of the user

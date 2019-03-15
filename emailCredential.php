@@ -2,17 +2,17 @@
 //Email Credentials
 ini_set( "display_errors", 0);
 require('resources/PHPMailer/PHPMailerAutoload.php');
-define ('MAIL_HOST' ,'mail.iitp.ac.in');
+define ('MAIL_HOST' ,'ssl://smtp.gmail.com');       //smtp server name
 define ('MAIL_SMTP_AUTH' ,true);
-define ('MAIL_USERNAME' ,'nss_gen_sec@iitp.ac.in');
-define ('MAIL_PASSWORD' ,'');           // Password of the nss_gen_sec mail account
+define ('MAIL_USERNAME' ,'deepanjan052000@gmail.com');
+define ('MAIL_PASSWORD' ,'nildeep0526');
 define ('MAIL_PORT' ,465);
 	function mailTo($to, $subject='', $message='', $altmsg='') {
-	   // echo !extension_loaded('openssl')?"Not Available":"Available";
+       // echo !extension_loaded('openssl')?"Not Available":"Available";
         $sender_email = "nss_gen_sec@iitp.ac.in";
-		$sender_name = "Blood_request";
-		try{
-    	    $mail = new PHPMailer();
+        $sender_name = "Blood_request";
+        try{
+            $mail = new PHPMailer();
             $mail->IsSMTP(); // telling the class to use SMTP
             $mail->Mailer = "smtp";
             $mail->Host = MAIL_HOST;
@@ -28,11 +28,11 @@ define ('MAIL_PORT' ,465);
             $mail->Body = $message;
             $mail->AltBody = $altmsg;
             $mail->Send();
-    	   // echo $message;
+           // echo $message;
             return 1;
-		} catch (Exception $e){
-		    return 0;
-		}
+        } catch (Exception $e){
+            return 0;
+        }
 
 // 		$headers = "From: $sender_name <$sender_email>"."\r\n".'X-Mailer: PHP/' . phpversion()."\r\n";
 // 		$headers .= 'Content-type: text/html;charset=ISO-8859-1'."\r\n";

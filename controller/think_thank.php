@@ -9,7 +9,7 @@ function SQLInjFilter(&$unfilteredString){
 
 $error = "";
 $return = "";
-$id = $_POST['id'];
+$code = (string)$_POST['code'];
 $status = 0;
 $mail_msg = "";
 $ret = array();
@@ -22,20 +22,13 @@ if (!isset($_POST['email']) || !filter_var($_POST['email'], FILTER_VALIDATE_EMAI
 	$error .= "Email-ID invalid. ";
 	$status = 400;
 }
-if (!isset($_POST['phone']) || !preg_match('/^[6789][0-9]{9}$/',$_POST['phone'])) {
-	$error .= "Phone No. Invalid. ";
+if (!isset($_POST['idea']) && $_POST['code']=="") {
+	$error .= "Idea blank. ";
 	$status = 400;
 }
-if (!isset($_POST['address']) || $_POST['address']=="") {
-	$error .= "Address blank. ";
+if (!isset($_POST['code']) && $_POST['code']=="") {
+	$error .= "Invalid input!!";
 	$status = 400;
-}
-if (!isset($_POST['reciever']) && $_POST['reciever']=="") {
-	$error .= "Reciever name blank. ";
-	$status = 400;
-}
-if (isset($_POST['id']) && $_POST['id']=="") {
-	$id = "0";	
 }
 
 //if (!isset($_POST['year']) || $_POST['year']<1 || $_POST['year']>4) {
@@ -46,28 +39,35 @@ if($status!=400){
 	//sql injection filter function call goes here
 	SQLInjFilter($_POST['phone']);
 	SQLInjFilter($_POST['email']);
-	SQLInjFilter($_POST['name']);
-	SQLInjFilter($_POST['reciever']);
-	SQLInjFilter($_POST['id']);
-	SQLInjFilter($_POST['address']);
+	SQLInjFilter($_POST['idea']);
+	$table = "think";
 
+	if($code=="1"){
+		$table = "thank";	
+	
 	//db stuff here
-	$sql = "INSERT INTO `blood_request`(name,email,phone,reciever,id,address) VALUES ('".$_POST['name']."', '".$_POST['email']."', '".$_POST['phone']."', '". $_POST['reciever'] ."', '". $id ."', '". $_POST['address'] . "')";
+	$sql = "INSERT INTO `". $table ."`(name,email,message) VALUES ('".$_POST['name']."', '".$_POST['email']."', '". $_POST['idea'] . "')";
 
 	if($link =mysqli_connect($servername, $username, $password, $dbname)){
 		$result = mysqli_query($link,$sql);
 	    if($result){
 	    	$status=200;
-	    	$return="Request Successfully Registered";
+	    	$return="Successfully Submitted";
 	    	
 	    	//=========== Mail Data ====================
-	    	$mail_to = "adarshrohit217@gmail.com";
-	    	$subject = "Blood Request by ". $_POST['name'];
-	    	$mail_body = "Name : ". $_POST['name'] . "(ID: " . $id . ")<br> Email: ". $_POST['email'] . "<br> Phone: " . $_POST['phone'] . "<br> Reciever Name: ". $_POST['reciever'] ."<br> Address: ". $_POST['address'];
-	    	$alternate_msg = "Name : ". $_POST['name'] . "(ID: " . $id . ") | Email: ". $_POST['email'] . " | Phone: " . $_POST['phone'] . " | Reciever Name: ". $_POST['reciever'] ." | Address: ". $_POST['address'];
+	    	$mail_to = "adarsh.cs17@iitp.ac.in";
+	    	if($code=="1"){
+	    		$subject = "Thank message by ". $_POST['name'];
+				$mail_body = "Name : ". $_POST['name'] . "<br> Email: ". $_POST['email'] . "<br> Message: " . $_POST['idea'];
+	    		$alternate_msg = "Name : ". $_POST['name'] . " | Email: ". $_POST['email'] . " | Message: " . $_POST['idea'];
+	    	else{
+	    		$subject = "Idea Submitted by ". $_POST['name'];
+				$mail_body = "Name : ". $_POST['name'] . "<br> Email: ". $_POST['email'] . "<br> Idea: " . $_POST['idea'];
+	    		$alternate_msg = "Name : ". $_POST['name'] . " | Email: ". $_POST['email'] . " | Idea: " . $_POST['idea'];		
+	    	}
 	    	if(mailTo($mail_to, $subject, $mail_body, $alternate_msg)){
 	    		$mail_msg = "sent";
-	    		$sql = "UPDATE `blood_request` SET mail_sent=2 WHERE `name`= '" .$_POST['name']. "' AND email= '" .$_POST['email']. "' AND reciever='". $_POST['reciever']. "' AND given=0 AND mail_sent=1";
+	    		$sql = "UPDATE `". $table ."` SET mail_sent=2 WHERE `name`= '" .$_POST['name']. "' AND email= '" .$_POST['email']. "' AND mail_sent=1";
         		if($link =mysqli_connect($servername, $username, $password, $dbname)){
         			$result = mysqli_query($link,$sql); $id=0;
             		if($result || mysqli_num_rows($result)>0){}
@@ -79,7 +79,7 @@ if($status!=400){
 	    		}
 	    	}else{
 	    		$mail_msg = "not sent";
-	    		$sql = "UPDATE `blood_request` SET mail_sent=0 WHERE `name`= '" .$_POST['name']. "' AND email= '" .$_POST['email']. "' AND reciever='". $_POST['reciever']. "' AND given=0 AND mail_sent=1";
+	    		$sql = "UPDATE `". $table ."` SET mail_sent=0 WHERE `name`= '" .$_POST['name']. "' AND email= '" .$_POST['email']. "' AND mail_sent=1";
         		if($link =mysqli_connect($servername, $username, $password, $dbname)){
         			$result = mysqli_query($link,$sql); $id=0;
             		if($result || mysqli_num_rows($result)>0){}
@@ -99,7 +99,7 @@ if($status!=400){
     	//error to connect to db
     	$status = 500;
     	$error = "error connecting to DB";
-		$error.=   "Debugging errno: " . mysqli_connect_errno();
+		$error.= "Debugging errno: " . mysqli_connect_errno();
 	}
 }
 //  $status=200;

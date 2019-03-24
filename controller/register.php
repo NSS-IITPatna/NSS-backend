@@ -2,8 +2,8 @@
 session_start();
 header('Content-Type: application/json');	
 
-require_once('../model/user.php');
-require_once('../dbConfig.php');
+require_once('model/user.php');
+require_once('dbConfig.php');
 
 $user = new User($mysqli);
 

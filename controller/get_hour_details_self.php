@@ -3,8 +3,8 @@ session_start();
 header('Content-Type: application/json');	
 //define('Tot_hours', 80);
 
-require_once('../model/hours.php');
-require_once('../dbConfig.php');
+require_once('model/hours.php');
+require_once('dbConfig.php');
 
 if(!isset($_SESSION['user'])){
 	$ret['status'] = 403;

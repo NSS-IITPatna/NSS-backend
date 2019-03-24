@@ -1,11 +1,11 @@
 <?php
 session_start();
-header('Content-Type: application/json');	
+header('Content-Type: application/json');
 
-require_once('../model/user.php');
-require_once('../dbConfig.php');
+require_once('model/user.php');
+require_once('dbConfig.php');
 
-//if(isset($_POST['userIdentity']) && isset($_POST['password'])){
+if(isset($_POST['userIdentity']) && isset($_POST['password'])){
 	$user = new User($mysqli);
 
 	$mail_or_username = $_POST['userIdentity'];
@@ -13,16 +13,14 @@ require_once('../dbConfig.php');
 
 	$ret = $user->loginUser($mail_or_username, $password);
 
-	$ret = $user->loginUser("1701cs17", "1234");
-
-	setcookie($cookie_name, $cookie_value, time() + (86400 * 30), "/"); // 86400 = 1 day
-
+	//$ret = $user->loginUser("1701cs17", "1234");
+	
 	$_SESSION['user'] = serialize($user);
 	$_SESSION['uroll'] = $user->getRollNo();
-// } else {
-// 	$ret['status'] = 403;
-// 	$ret['message'] = "Request Denied";
-// }
+} else {
+	$ret['status'] = 403;
+	$ret['message'] = "Request Denied";
+}
 echo json_encode($ret, JSON_PRETTY_PRINT);
 
 ?>

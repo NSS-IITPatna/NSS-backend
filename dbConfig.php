@@ -1,8 +1,8 @@
 <?php
 $apiKey = array("sha1APIkey1","sha1APIkey2");
 $servername = "localhost";
-$username = "";
-$password = "";
+$username = "root";
+$password = "Deep@0526";
 $dbname = "nss";
 
 $mysqli = new mysqli($servername, $username, $password, $dbname);

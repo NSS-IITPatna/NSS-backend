@@ -2,8 +2,8 @@
 
 ###API details:
 
-/Request blood:
-* Post:
+api/?Request blood:
+* POST:
   *  Name
   *  Email
   *  ID
@@ -23,6 +23,11 @@
 ###Status codes:  
   * 200 : successful
   * 500 : DB connect error
-  * 400 : bad request error
+  * 501 : Could not fetcfh data from DB
+  * 502 : Could not update/add/remove data in DB
+  * 400 : bad request error/ Invalid Inputs
+  * 402 : Duplicate Entry 
+  * 403 : Access Forbidden/ Unauthorised Access
+  * 404 : API Not Found
   * description of error is in the "message of the JSON object"
   

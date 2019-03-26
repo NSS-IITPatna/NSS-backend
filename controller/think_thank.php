@@ -1,11 +1,19 @@
 <?php
+
 include 'dbConfig.php';
 include 'emailCredential.php';
+header('Content-Type: application/json');	
+
 function SQLInjFilter(&$unfilteredString){
 		$unfilteredString = mb_convert_encoding($unfilteredString, 'UTF-8', 'UTF-8');
 		$unfilteredString = htmlentities($unfilteredString, ENT_QUOTES, 'UTF-8');
 		// return $unfilteredString;
 }
+
+$_POST['name'] = "Deepanjan Datta";
+$_POST['email'] = "deepanjan052000@gmail.com";
+$_POST['idea'] = "Fuck off my friend!";
+$_POST['code'] = "1";
 
 $error = "";
 $return = "";
@@ -13,6 +21,7 @@ $code = (string)$_POST['code'];
 $status = 0;
 $mail_msg = "";
 $ret = array();
+
 
 if (!isset($_POST['name']) || $_POST['name']=="") {
 	$error .= "Name invalid. ";
@@ -22,7 +31,7 @@ if (!isset($_POST['email']) || !filter_var($_POST['email'], FILTER_VALIDATE_EMAI
 	$error .= "Email-ID invalid. ";
 	$status = 400;
 }
-if (!isset($_POST['idea']) && $_POST['code']=="") {
+if (!isset($_POST['idea']) && $_POST['idea']=="") {
 	$error .= "Idea blank. ";
 	$status = 400;
 }
@@ -31,23 +40,21 @@ if (!isset($_POST['code']) && $_POST['code']=="") {
 	$status = 400;
 }
 
-//if (!isset($_POST['year']) || $_POST['year']<1 || $_POST['year']>4) {
-//	$error .= "Year invalid. ";
-//	$status = 400;
-//}
 if($status!=400){
 	//sql injection filter function call goes here
 	SQLInjFilter($_POST['phone']);
 	SQLInjFilter($_POST['email']);
 	SQLInjFilter($_POST['idea']);
 	$table = "think";
+	$sql = "INSERT INTO `". $table ."`(name,email,idea) VALUES ('".$_POST['name']."', '".$_POST['email']."', '". $_POST['idea'] . "')";
 
 	if($code=="1"){
 		$table = "thank";	
+		$sql = "INSERT INTO `". $table ."`(name,email,message) VALUES ('".$_POST['name']."', '".$_POST['email']."', '". $_POST['idea'] . "')";
+	}
 	
 	//db stuff here
-	$sql = "INSERT INTO `". $table ."`(name,email,message) VALUES ('".$_POST['name']."', '".$_POST['email']."', '". $_POST['idea'] . "')";
-
+	
 	if($link =mysqli_connect($servername, $username, $password, $dbname)){
 		$result = mysqli_query($link,$sql);
 	    if($result){
@@ -60,7 +67,7 @@ if($status!=400){
 	    		$subject = "Thank message by ". $_POST['name'];
 				$mail_body = "Name : ". $_POST['name'] . "<br> Email: ". $_POST['email'] . "<br> Message: " . $_POST['idea'];
 	    		$alternate_msg = "Name : ". $_POST['name'] . " | Email: ". $_POST['email'] . " | Message: " . $_POST['idea'];
-	    	else{
+	    	}else{
 	    		$subject = "Idea Submitted by ". $_POST['name'];
 				$mail_body = "Name : ". $_POST['name'] . "<br> Email: ". $_POST['email'] . "<br> Idea: " . $_POST['idea'];
 	    		$alternate_msg = "Name : ". $_POST['name'] . " | Email: ". $_POST['email'] . " | Idea: " . $_POST['idea'];		
@@ -119,6 +126,6 @@ if($status == 200){
 //echo $data_back->{"data1"};
 //echo var_dump($obj);
 //http_response_code($status);
-echo json_encode($ret);
+echo json_encode($ret, JSON_PRETTY_PRINT);
 
 ?>

@@ -1,6 +1,8 @@
 <?php
 include 'dbConfig.php';
 include 'emailCredential.php';
+header('Content-Type: application/json');	
+
 function SQLInjFilter(&$unfilteredString){
 		$unfilteredString = mb_convert_encoding($unfilteredString, 'UTF-8', 'UTF-8');
 		$unfilteredString = htmlentities($unfilteredString, ENT_QUOTES, 'UTF-8');
@@ -38,10 +40,6 @@ if (isset($_POST['id']) && $_POST['id']=="") {
 	$id = "0";	
 }
 
-//if (!isset($_POST['year']) || $_POST['year']<1 || $_POST['year']>4) {
-//	$error .= "Year invalid. ";
-//	$status = 400;
-//}
 if($status!=400){
 	//sql injection filter function call goes here
 	SQLInjFilter($_POST['phone']);
@@ -119,6 +117,6 @@ if($status == 200){
 //echo $data_back->{"data1"};
 //echo var_dump($obj);
 //http_response_code($status);
-echo json_encode($ret);
+echo json_encode($ret, JSON_PRETTY_PRINT);
 
 ?>

@@ -4,8 +4,8 @@ ini_set( "display_errors", 0);
 require('resources/PHPMailer/PHPMailerAutoload.php');
 define ('MAIL_HOST' ,'ssl://smtp.gmail.com');       //smtp server name
 define ('MAIL_SMTP_AUTH' ,true);
-define ('MAIL_USERNAME' ,'deepanjan052000@gmail.com');
-define ('MAIL_PASSWORD' ,'nildeep0526');
+define ('MAIL_USERNAME' ,'');
+define ('MAIL_PASSWORD' ,'');
 define ('MAIL_PORT' ,465);
 	function mailTo($to, $subject='', $message='', $altmsg='') {
        // echo !extension_loaded('openssl')?"Not Available":"Available";
